@@ -1,0 +1,19 @@
+
+eval "$(starship init bash)"
+source <(https-wrench completion bash)
+eval "$(zoxide init bash)"
+
+alias cd='z'
+alias ..='cd ..'
+alias l='ls -alh'
+alias l='ls -alh'
+alias la='eza -a'
+alias ll='eza -lhaa --git --git-repos --no-user --octal-permissions --no-permissions --icons --time-style='\''+%Y-%m-%d %H:%M'\'''
+alias lla='eza -la'
+alias lldirnewest='llnewest -D'
+alias llnewest='eza --sort=time --reverse --oneline --git-ignore --changed --long --no-filesize --no-user --no-permissions --time-style="+%y-%m-%d %h:%m -" --icons=auto'
+alias llsize='ll --sort=size --reverse  --total-size'
+alias lltime='ll --sort=time --reverse'
+alias lltree='eza -lgha --git --git-repos -T --total-size'
+alias ls='eza'
+alias lt='eza --tree'
