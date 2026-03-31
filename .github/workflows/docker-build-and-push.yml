@@ -1,0 +1,69 @@
+---
+name: Docker Build and Push
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+
+      # Set up QEMU for multi-arch builds
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
+
+      # Set up Docker buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Generate tags based on git context
+      # ref: https://github.com/docker/metadata-action
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            # Branch name
+            # type=ref,event=branch
+            #
+            # Git short SHA
+            type=sha,prefix=
+            #
+            # (git) tag event
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
+            #
+            # Latest on default branch
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Get current date
+        id: date
+        run: |
+          echo "{date}={$(date -Iseconds)}" >> $GITHUB_STATE
+
+      - name: Build only
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            LABEL_SOURCE="https://github.com/xenOs76/netdrill"
+            LABEL_CREATED=${{ env.date }}
+            LABEL_REVISION=${{ github.sha }}
+          # BuildKit cache
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
