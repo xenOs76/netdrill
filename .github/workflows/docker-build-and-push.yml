@@ -58,7 +58,7 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: false
+          push: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             LABEL_SOURCE="https://github.com/xenOs76/netdrill"
