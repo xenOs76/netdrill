@@ -40,16 +40,11 @@ jobs:
             # Branch name
             # type=ref,event=branch
             #
-            # PR number
-            # type=ref,event=pr
-            #
             # Git short SHA
             type=sha,prefix=
             #
-            # Semantic version from tag (es: v0.0.1)
-            # https://github.com/docker/metadata-action?tab=readme-ov-file#typesemver
-            #
-            type=semver,pattern={{version}}
+            # (git) tag event
+            type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
             #
             # Latest on default branch
             type=raw,value=latest,enable={{is_default_branch}}
