@@ -5,62 +5,73 @@ RUN apk add --no-cache curl tar
 
 # Fetch https-wrench
 RUN set -ex \
-    && ARCH=$(uname -m) \
-    && case "$ARCH" in \
-        x86_64) BIN_ARCH="Linux_x86_64" ;; \
-        aarch64) BIN_ARCH="Linux_arm64" ;; \
-        *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
-    esac \
-    && curl -sSL https://api.github.com/repos/xenOs76/https-wrench/releases/latest \
-        | grep "browser_download_url.*${BIN_ARCH}\.tar\.gz" \
-        | cut -d '"' -f 4 \
-        | xargs curl -L -o https-wrench.tar.gz \
-    && tar -xzf https-wrench.tar.gz \
-    && mv https-wrench /tmp/https-wrench \
-    && chmod +x /tmp/https-wrench
+  && ARCH=$(uname -m) \
+  && case "$ARCH" in \
+  x86_64) BIN_ARCH="Linux_x86_64" ;; \
+  aarch64) BIN_ARCH="Linux_arm64" ;; \
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
+  esac \
+  && curl -sSL https://api.github.com/repos/xenOs76/https-wrench/releases/latest \
+  | grep "browser_download_url.*${BIN_ARCH}\.tar\.gz" \
+  | cut -d '"' -f 4 \
+  | xargs curl -L -o https-wrench.tar.gz \
+  && tar -xzf https-wrench.tar.gz \
+  && mv https-wrench /tmp/https-wrench \
+  && chmod +x /tmp/https-wrench
 
 # Main stage
 FROM alpine:latest
 
+ARG LABEL_CREATED
+ARG LABEL_DESCRIPTION
+ARG LABEL_REVISION
+ARG LABEL_SOURCE
+
+LABEL org.opencontainers.image.authors="xeno@os76.xyz"
+LABEL org.opencontainers.image.created=$LABEL_CREATED
+LABEL org.opencontainers.image.description="NetDrill is a Docker image designed for network troubleshooting within Kubernetes clusters"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.revision=$LABEL_REVISION
+LABEL org.opencontainers.image.source=$LABEL_SOURCE
+LABEL org.opencontainers.image.title="NetDrill"
+
 RUN set -ex \
-    && apk update \
-    && apk upgrade \
-    && apk add --no-cache \
-        apache2-utils \
-        bash \
-        bind-tools \
-        busybox-extras \
-        curl \
-        drill \
-        ethtool \
-        file \
-        fping \
-        httpie \
-        iftop \
-        iperf3 \
-        iproute2 \
-        iputils \
-        ipvsadm \
-        jq \
-        nmap \
-        nmap-scripts \
-        nmap-nping \
-        openssl \
-        socat \
-        strace \
-        tcpdump \
-        tcptraceroute \
-        util-linux \
-        neovim \
-        wget \
-        bash-completion \
-        eza \
-        fzf \
-        zoxide \
-        zoxide-bash-completion \
-        zellij \
-        zellij-bash-completion \
-        starship
+  && apk update \
+  && apk upgrade \
+  && apk add --no-cache \
+  apache2-utils \
+  bash \
+  bash-completion \
+  bind-tools \
+  busybox-extras \
+  curl \
+  ethtool \
+  eza \
+  file \
+  fping \
+  httpie \
+  iftop \
+  iperf3 \
+  iproute2 \
+  iputils \
+  ipvsadm \
+  jq \
+  neovim \
+  nmap \
+  nmap-nping \
+  nmap-scripts \
+  openssl \
+  socat \
+  starship \
+  strace \
+  tcpdump \
+  tcptraceroute \
+  util-linux \
+  wget \
+  zellij \
+  zellij-bash-completion \
+  zoxide \
+  zoxide-bash-completion
 
 # Install https-wrench from fetcher
 COPY --from=fetcher /tmp/https-wrench /usr/local/bin/https-wrench

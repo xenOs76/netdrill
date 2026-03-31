@@ -2,10 +2,10 @@
 
 A Kubernetes network trouble-shooting container.
 
-When in doubt about your Kubernetes setup, use `netdrill` to find a way. Anyway.
-
-## Acknowledgements
+## Acknowledgments
 
 `netdrill` is heavily inspired by
 [netshoot](https://github.com/nicolaka/netshoot) and
-[kubectl-netshoot](https://github.com/nilic/kubectl-netshoot).
+[kubectl-netshoot](https://github.com/nilic/kubectl-netshoot). To the point of
+being mostly an automation of the more common customization tasks done within a
+`netshoot` instance.
