@@ -8,7 +8,6 @@ alias cd='z'
 alias ..='cd ..'
 
 alias l='ls -alh'
-alias l='ls -alh'
 alias la='eza -a'
 alias ll='eza -lhaa --git --git-repos --no-user --octal-permissions --no-permissions --icons --time-style='\''+%Y-%m-%d %H:%M'\'''
 alias lla='eza -la'
