@@ -39,36 +39,21 @@ RUN set -ex \
   && apk update \
   && apk upgrade \
   && apk add --no-cache \
-  apache2-utils \
   bash \
   bash-completion \
-  bind-tools \
-  busybox-extras \
+  doggo \
   curl \
-  ethtool \
   eza \
-  file \
-  fping \
-  httpie \
-  iftop \
   iperf3 \
-  iproute2 \
   iputils \
-  ipvsadm \
   jq \
-  neovim \
+  vim \
   nmap \
-  nmap-nping \
-  nmap-scripts \
   openssl \
-  socat \
   starship \
-  strace \
   tcpdump \
   tcptraceroute \
-  util-linux \
   wget \
-  zellij \
   zellij-bash-completion \
   zoxide \
   zoxide-bash-completion

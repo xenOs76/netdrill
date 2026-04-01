@@ -2,10 +2,11 @@
 eval "$(starship init bash)"
 source <(https-wrench completion bash)
 eval "$(zoxide init bash)"
+eval "$(doggo completions bash)"
 
 alias cd='z'
 alias ..='cd ..'
-alias l='ls -alh'
+
 alias l='ls -alh'
 alias la='eza -a'
 alias ll='eza -lhaa --git --git-repos --no-user --octal-permissions --no-permissions --icons --time-style='\''+%Y-%m-%d %H:%M'\'''
@@ -17,3 +18,12 @@ alias lltime='ll --sort=time --reverse'
 alias lltree='eza -lgha --git --git-repos -T --total-size'
 alias ls='eza'
 alias lt='eza --tree'
+
+alias dig="doggo"
+alias doggo-doh="doggo @https://cloudflare-dns.com/dns-query"
+alias doggo-tls="doggo @tls://1.1.1.1"
+
+alias zellij="which zellij || apk add zellij && /usr/bin/zellij"
+
+# reset output on first start
+clear
