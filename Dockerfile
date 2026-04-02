@@ -44,6 +44,7 @@ RUN set -ex \
   doggo \
   curl \
   eza \
+  direnv \
   iperf3 \
   iputils \
   jq \
