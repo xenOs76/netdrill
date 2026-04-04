@@ -56,12 +56,13 @@ jobs:
         run: |
           echo "{date}={$(date -Iseconds)}" >> $GITHUB_STATE
 
-      - name: Build only
+      - name: Build and Push
         uses: docker/build-push-action@v7
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: true
+          no-cache: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
             LABEL_SOURCE="https://github.com/xenOs76/netdrill"
