@@ -19,6 +19,24 @@ RUN set -ex \
   && mv https-wrench /tmp/https-wrench \
   && chmod +x /tmp/https-wrench
 
+# Fetch aws-probe
+RUN set -ex \
+  && ARCH=$(uname -m) \
+  && case "$ARCH" in \
+  x86_64) BIN_ARCH="Linux_amd64" ;; \
+  aarch64) BIN_ARCH="Linux_arm64" ;; \
+  *) echo "Unsupported architecture: $ARCH"; exit 1 ;; \
+  esac \
+  && curl -sSL https://api.github.com/repos/xenOs76/aws-probe/releases/latest \
+  | grep "browser_download_url.*${BIN_ARCH}\.tar\.gz" \
+  | cut -d '"' -f 4 \
+  | xargs curl -L -o aws-probe.tar.gz \
+  && tar -xzf aws-probe.tar.gz \
+  && mv aws-probe /tmp/aws-probe \
+  && chmod +x /tmp/aws-probe
+
+
+
 # Main stage
 FROM alpine:latest
 
@@ -61,6 +79,9 @@ RUN set -ex \
 
 # Install https-wrench from fetcher
 COPY --from=fetcher /tmp/https-wrench /usr/local/bin/https-wrench
+
+# Install aws-probe from fetcher
+COPY --from=fetcher /tmp/aws-probe /usr/local/bin/aws-probe
 
 WORKDIR /root
 
