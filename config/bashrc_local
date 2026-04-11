@@ -1,6 +1,6 @@
 
 eval "$(starship init bash)"
-source <(https-wrench completion bash)
+eval "$(https-wrench completion bash)"
 eval "$(zoxide init bash)"
 eval "$(direnv hook bash)"
 eval "$(doggo completions bash)"
@@ -25,13 +25,12 @@ alias dig="doggo"
 alias doggo-doh="doggo @https://cloudflare-dns.com/dns-query"
 alias doggo-tls="doggo @tls://1.1.1.1"
 
-alias zellij="command zellij >/dev/null 2>&1 || apk add zellij && /usr/bin/zellij"
+# packages to install on demand
 alias git="command git >/dev/null 2>&1 || apk add git && /usr/bin/git"
-alias python="command python >/dev/null 2>&1 || apk add python3 && /usr/bin/python"
 alias go="command go >/dev/null 2>&1 || apk add go && /usr/bin/go"
 alias nix="command nix >/dev/null 2>&1 || apk add nix && /usr/bin/nix --extra-experimental-features nix-command --extra-experimental-features flakes"
+alias python="command python >/dev/null 2>&1 || apk add python3 && /usr/bin/python"
+alias zellij="command zellij >/dev/null 2>&1 || apk add zellij && /usr/bin/zellij"
 
+alias jwtinfo-local-token="https-wrench jwtinfo --token-file /var/run/secrets/kubernetes.io/serviceaccount/token"
 alias nvim-os76="nix run github:xenos76/os76-nvf"
-
-# reset output on first start
-clear
