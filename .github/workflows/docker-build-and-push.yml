@@ -12,6 +12,7 @@ jobs:
     permissions:
       contents: read
       packages: write
+      security-events: write # Required to upload SARIF files to Security tab
 
     steps:
       - uses: actions/checkout@v6
