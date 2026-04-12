@@ -44,6 +44,8 @@ jobs:
             #
             # Git short SHA
             type=sha,prefix=
+            # full length sha
+            type=sha,format=long
             #
             # (git) tag event
             type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
