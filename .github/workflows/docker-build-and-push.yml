@@ -77,6 +77,6 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@v0.35.0
         with:
-          image-ref: "ghcr.io/xenos76/netdrill:${{ github.sha }}"
+          image-ref: "ghcr.io/xenos76/netdrill:sha-${{ github.sha }}"
           format: "sarif"
           output: "trivy-results.sarif"
