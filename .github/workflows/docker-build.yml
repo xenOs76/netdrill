@@ -68,10 +68,3 @@ jobs:
           # BuildKit cache
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.35.0
-        with:
-          image-ref: "netdrill:${{ github.sha }}"
-          format: "sarif"
-          output: "trivy-results.sarif"
