@@ -1,9 +1,11 @@
 
-eval "$(starship init bash)"
-eval "$(https-wrench completion bash)"
-eval "$(zoxide init bash)"
+export LC_ALL=UTF8
+
 eval "$(direnv hook bash)"
 eval "$(doggo completions bash)"
+eval "$(https-wrench completion bash)"
+eval "$(starship init bash)"
+eval "$(zoxide init bash)"
 
 alias cd='z'
 alias ..='cd ..'
@@ -25,16 +27,17 @@ alias dig="doggo"
 alias doggo-doh="doggo @https://cloudflare-dns.com/dns-query"
 alias doggo-tls="doggo @tls://1.1.1.1"
 
+alias apk-install="apk add"
 alias jwtinfo-local-token="https-wrench jwtinfo --token-file /var/run/secrets/kubernetes.io/serviceaccount/token"
 alias nvim-os76="nix run github:xenos76/os76-nvf"
 
-# packages to install on demand
-alias file="command file >/dev/null 2>&1 || apk add file && /usr/bin/file"
-alias git="command git >/dev/null 2>&1 || apk add git && /usr/bin/git"
-alias go="command go >/dev/null 2>&1 || apk add go && /usr/bin/go"
-alias htop="command htop >/dev/null 2>&1 || apk add htop && /usr/bin/htop"
-alias nix="command nix >/dev/null 2>&1 || apk add nix && /usr/bin/nix --extra-experimental-features nix-command --extra-experimental-features flakes"
-alias python="command python >/dev/null 2>&1 || apk add python3 && /usr/bin/python"
-
-export LC_ALL=UTF8
-
+#
+# Aliases for packages to install on demand
+#
+alias file="apk add -q file && /usr/bin/file"
+alias git="apk add -q git && /usr/bin/git"
+alias go="apk add -q go && /usr/bin/go"
+alias htop="apk add -q htop && /usr/bin/htop"
+alias nix="apk add -q nix && /usr/bin/nix --extra-experimental-features nix-command --extra-experimental-features flakes"
+alias python="apk add -q python3 && /usr/bin/python"
+alias zellij="apk add -q zellij && /usr/bin/zellij"

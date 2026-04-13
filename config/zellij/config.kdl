@@ -1,3 +1,5 @@
+
+default_shell "bash"
 theme "catppuccin-frappe"
 
 keybinds clear-defaults=true {
