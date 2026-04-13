@@ -35,8 +35,6 @@ RUN set -ex \
   && mv aws-probe /tmp/aws-probe \
   && chmod +x /tmp/aws-probe
 
-
-
 # Main stage
 FROM alpine:latest
 
@@ -73,7 +71,7 @@ RUN set -ex \
   tcpdump \
   tcptraceroute \
   wget \
-  zellij-bash-completion \
+  tmux \
   zoxide \
   zoxide-bash-completion
 
@@ -89,9 +87,9 @@ WORKDIR /root
 COPY ./config/starship.toml /etc/starship.toml
 ENV STARSHIP_CONFIG=/etc/starship.toml 
 
-RUN mkdir /etc/zellij
-COPY ./config/zellij/config.kdl /etc/zellij/config.kdl
-ENV ZELLIJ_CONFIG_DIR=/etc/zellij
+COPY ./config/tmux.conf /root/.tmux.conf
+RUN mkdir -p /root/.config/tmux
+COPY ./config/tmux_config/ /root/.config/tmux/
 
 COPY ./config/bashrc_local /etc/bashrc_local
 RUN echo 'source /etc/bashrc_local' >> /root/.bashrc

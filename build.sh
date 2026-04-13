@@ -7,7 +7,7 @@ set -e
 REGISTRY="registry.0.os76.xyz"
 REGISTRY_USER="xeno"
 IMAGE_NAME="netdrill"
-IMAGE_TAG="v0.0.3"
+IMAGE_TAG="v0.0.4"
 FULL_IMAGE_NAME="${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}"
 LABEL_SOURCE="https://git.priv.os76.xyz/xeno/netdrill"
 LABEL_CREATED="$(date -Iseconds)"
@@ -70,9 +70,6 @@ docker buildx build \
   "${ACTION}" .
 
 echo "Build complete!"
-
-if [ "$1" == "--push" ]; then
-  echo "You can now launch the newly uploaded image with one of the following commands:"
-  echo "docker run --hostname netdrill-latest --rm -it registry.0.os76.xyz/xeno/netdrill:latest"
-  echo "docker run --hostname netdrill --rm -it registry.0.os76.xyz/xeno/netdrill:${IMAGE_TAG}"
-fi
+echo "You can now launch the newly uploaded image with one of the following commands:"
+echo "docker run --hostname netdrill-latest --rm -it registry.0.os76.xyz/xeno/netdrill:latest"
+echo "docker run --hostname netdrill --rm -it registry.0.os76.xyz/xeno/netdrill:${IMAGE_TAG}"
