@@ -64,7 +64,7 @@ RUN set -ex \
   iperf3 \
   iputils \
   jq \
-  vim \
+  neovim \
   nmap \
   openssl \
   starship \
@@ -84,8 +84,13 @@ COPY --from=fetcher /tmp/aws-probe /usr/local/bin/aws-probe
 WORKDIR /root
 
 # Customize bash with local settings
+COPY ./config/dotDirenvTempleate /etc/dotDirenvTemplate
+
 COPY ./config/starship.toml /etc/starship.toml
 ENV STARSHIP_CONFIG=/etc/starship.toml 
+
+RUN mkdir /root/direnv-templates
+COPY ./config/direnv-templates /root/direnv-templates
 
 RUN mkdir /etc/zellij
 COPY ./config/zellij/config.kdl /etc/zellij/config.kdl

@@ -28,8 +28,10 @@ alias doggo-doh="doggo @https://cloudflare-dns.com/dns-query"
 alias doggo-tls="doggo @tls://1.1.1.1"
 
 alias apk-install="apk add"
+alias get-direnv-config-template='cat /etc/dotDirenvTemplate'
 alias jwtinfo-local-token="https-wrench jwtinfo --token-file /var/run/secrets/kubernetes.io/serviceaccount/token"
 alias nvim-os76="nix run github:xenos76/os76-nvf"
+alias vi="nvim"
 
 #
 # Aliases for packages to install on demand
