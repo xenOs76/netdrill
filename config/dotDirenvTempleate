@@ -1,0 +1,14 @@
+#
+#  direnv config
+#
+#  https://direnv.net/
+#  https://github.com/direnv/direnv/wiki
+#  https://github.com/nix-community/nix-direnv
+#
+
+#use nix
+#use flake
+
+#export VIRTUAL_ENV=".venv"
+#test -d $VIRTUAL_ENV || (echo 'Creating Python venv' && python -m venv $VIRTUAL_ENV && source $VIRTUAL_ENV/bin/activate && pip install -r requirements.txt && pip install -r requirements-dev.txt)
+#layout python

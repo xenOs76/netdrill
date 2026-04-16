@@ -1,6 +1,6 @@
 
 default_shell "bash"
-theme "catppuccin-frappe"
+theme "tokyo-night-storm"
 
 keybinds clear-defaults=true {
     locked {
@@ -235,7 +235,7 @@ plugins {
     strider location="zellij:strider"
     tab-bar location="zellij:tab-bar"
     welcome-screen location="zellij:session-manager" {
-        welcome_screen true
+        welcome_screen false
     }
 }
 
@@ -430,7 +430,7 @@ default_mode "locked"
 // Whether to show tips on startup
 // Default: true
 //
-// show_startup_tips false
+show_startup_tips false
 
 // Whether to show release notes on first version run
 // Default: true
