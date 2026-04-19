@@ -5,7 +5,9 @@
     <i>To find a way. Any way.</i>
 </p>
 
-A Docker container for Kubernetes network troubleshooting.
+A Docker container for Kubernetes network troubleshooting.\
+Better deployed with
+[kubectl-netdrill](https://github.com/xenOs76/kubectl-netdrill).
 
 ## Acknowledgments
 
