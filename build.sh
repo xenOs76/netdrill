@@ -7,7 +7,7 @@ set -e
 REGISTRY="registry.0.os76.xyz"
 REGISTRY_USER="xeno"
 IMAGE_NAME="netdrill"
-IMAGE_TAG="v0.0.4"
+IMAGE_TAG="v0.0.5"
 FULL_IMAGE_NAME="${REGISTRY}/${REGISTRY_USER}/${IMAGE_NAME}"
 LABEL_SOURCE="https://git.priv.os76.xyz/xeno/netdrill"
 LABEL_CREATED="$(date -Iseconds)"
