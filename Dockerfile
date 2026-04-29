@@ -57,10 +57,11 @@ RUN set -ex \
   && apk add --no-cache \
   bash \
   bash-completion \
-  doggo \
   curl \
-  eza \
   direnv \
+  doggo \
+  eza \
+  fzf \
   iperf3 \
   iputils \
   jq \
@@ -77,9 +78,11 @@ RUN set -ex \
 
 # Install https-wrench from fetcher
 COPY --from=fetcher /tmp/https-wrench /usr/local/bin/https-wrench
+RUN /usr/local/bin/https-wrench --version
 
 # Install aws-probe from fetcher
 COPY --from=fetcher /tmp/aws-probe /usr/local/bin/aws-probe
+RUN /usr/local/bin/aws-probe -v
 
 WORKDIR /root
 

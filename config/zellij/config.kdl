@@ -435,5 +435,5 @@ show_startup_tips false
 // Whether to show release notes on first version run
 // Default: true
 //
-// show_release_notes false
+show_release_notes false
 
