@@ -1,5 +1,7 @@
+ARG ALPINE_VERSION=3.23.4
+
 # Fetcher stage
-FROM alpine:latest AS fetcher
+FROM alpine:${ALPINE_VERSION} AS fetcher
 
 RUN apk add --no-cache curl tar
 
@@ -36,7 +38,7 @@ RUN set -ex \
   && chmod +x /tmp/aws-probe
 
 # Main stage
-FROM alpine:latest
+FROM alpine:${ALPINE_VERSION}
 
 ARG LABEL_CREATED
 ARG LABEL_DESCRIPTION
@@ -67,6 +69,7 @@ RUN set -ex \
   jq \
   neovim \
   nmap \
+  nmap-scripts \
   openssl \
   starship \
   tcpdump \
@@ -87,7 +90,7 @@ RUN /usr/local/bin/aws-probe -v
 WORKDIR /root
 
 # Customize bash with local settings
-COPY ./config/dotDirenvTempleate /etc/dotDirenvTemplate
+COPY ./config/dotDirenvTemplate /etc/dotDirenvTemplate
 
 COPY ./config/starship.toml /etc/starship.toml
 ENV STARSHIP_CONFIG=/etc/starship.toml 
