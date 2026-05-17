@@ -1,0 +1,18 @@
+# Netdrill
+
+## v0.1.0 (2026-05-17)
+
+### Chore
+
+- Migrated Python development environment setup to use uv package manager,
+  replacing traditional virtual environment configuration
+- Fixed configuration template file naming inconsistency
+- Updated Docker build configuration with configurable Alpine base image version
+  and added development tools for enhanced system capabilities
+- add nmap-scripts package
+
+## v0.0.1 (2026-03-31)
+
+### Feat
+
+- initial import
