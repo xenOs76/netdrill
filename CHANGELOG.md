@@ -1,5 +1,11 @@
 # Netdrill
 
+## v0.1.1 (2026-05-28)
+
+### Feat
+
+    Add aws-probe 0.1.3 and https-wrench 0.14.0
+
 ## v0.1.0 (2026-05-17)
 
 ### Chore
