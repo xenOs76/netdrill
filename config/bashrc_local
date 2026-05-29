@@ -4,6 +4,7 @@ export LC_ALL=UTF8
 eval "$(direnv hook bash)"
 eval "$(doggo completions bash)"
 eval "$(https-wrench completion bash)"
+eval "$(aws-probe completion bash)"
 eval "$(starship init bash)"
 eval "$(zoxide init bash)"
 

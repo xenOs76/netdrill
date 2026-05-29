@@ -1,5 +1,11 @@
 # Netdrill
 
+## v0.1.2 (2026-05-29)
+
+### Chore
+
+    Load bash autocompletion for aws-probe in local bash config
+
 ## v0.1.1 (2026-05-28)
 
 ### Feat
