@@ -1,5 +1,11 @@
 # Netdrill
 
+## v0.1.4 (2026-08-22)
+
+### Chore
+
+    Trigger rebuild to add aws-probe 0.3.1  and https-wrench 0.14.2
+
 ## v0.1.3 (2026-07-22)
 
 ### Chore
