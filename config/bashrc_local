@@ -24,7 +24,6 @@ alias lltree='eza -lgha --git --git-repos -T --total-size'
 alias ls='eza'
 alias lt='eza --tree'
 
-alias dig="doggo"
 alias doggo-doh="doggo @https://cloudflare-dns.com/dns-query"
 alias doggo-tls="doggo @tls://1.1.1.1"
 

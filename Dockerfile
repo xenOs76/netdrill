@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.23.4
+ARG ALPINE_VERSION=3.24.3
 
 # Fetcher stage
 FROM alpine:${ALPINE_VERSION} AS fetcher
@@ -59,6 +59,7 @@ RUN set -ex \
   && apk add --no-cache \
   bash \
   bash-completion \
+  bind-tools \
   curl \
   direnv \
   doggo \

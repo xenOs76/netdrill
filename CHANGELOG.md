@@ -1,5 +1,11 @@
 # Netdrill
 
+## v0.1.8 (2026-10-24)
+
+### Chore
+
+    Trigger rebuild to add dig and https-wrench 0.17.0
+
 ## v0.1.7 (2026-09-15)
 
 ### Chore
