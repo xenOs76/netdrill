@@ -9,6 +9,21 @@ A Docker container for Kubernetes network troubleshooting.\
 Better deployed with
 [kubectl-netdrill](https://github.com/xenOs76/kubectl-netdrill).
 
+## Verify Image Signature & SBOM
+
+```bash
+cosign verify \
+  --certificate-identity-regexp "^https://github\.com/xenOs76/netdrill/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/xenos76/netdrill:<tag>
+
+cosign verify-attestation \
+  --type spdxjson \
+  --certificate-identity-regexp "^https://github\.com/xenOs76/netdrill/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
+  --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+  ghcr.io/xenos76/netdrill:<tag>
+```
+
 ## Acknowledgments
 
 `netdrill` is heavily inspired by

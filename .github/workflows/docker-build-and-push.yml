@@ -6,6 +6,9 @@ on:
     tags:
       - "*"
 
+env:
+  TRIVY_VERSION: v0.76.2
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -13,20 +16,38 @@ jobs:
       contents: read
       packages: write
       security-events: write # Required to upload SARIF files to Security tab
+      id-token: write # Required for keyless Cosign OIDC signing
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Lint Dockerfile with Hadolint
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      - name: Scan Dockerfile with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "config"
+          scan-ref: "Dockerfile"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          version: ${{ env.TRIVY_VERSION }}
 
       # Set up QEMU for multi-arch builds
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
       # Set up Docker buildx
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -36,7 +57,7 @@ jobs:
       # ref: https://github.com/docker/metadata-action
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -54,13 +75,15 @@ jobs:
             # Latest on default branch
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Get current date
+      - name: Get current date and repository name
         id: date
         run: |
-          echo "{date}={$(date -Iseconds)}" >> $GITHUB_STATE
+          echo "date=$(date -Iseconds)" >> "$GITHUB_OUTPUT"
+          echo "repo=$(echo "${GITHUB_REPOSITORY}" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
 
       - name: Build and Push
-        uses: docker/build-push-action@v7
+        id: build-and-push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
@@ -68,22 +91,80 @@ jobs:
           no-cache: true
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            LABEL_SOURCE="https://github.com/xenOs76/netdrill"
-            LABEL_CREATED=${{ env.date }}
+            LABEL_SOURCE="https://github.com/${{ github.repository }}"
+            LABEL_CREATED=${{ steps.date.outputs.date }}
             LABEL_REVISION=${{ github.sha }}
           # BuildKit cache
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@v0.35.0
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
-          image-ref: "ghcr.io/xenos76/netdrill:sha-${{ github.sha }}"
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Generate Trivy SARIF report
+        if: always()
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
           format: "sarif"
           output: "trivy-results.sarif"
+          version: ${{ env.TRIVY_VERSION }}
 
       - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v4
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
         if: always()
         with:
-          sarif_file: "trivy-results.sarif"
+          sarif_file: trivy-results.sarif
+
+      - name: Generate SBOM (SPDX JSON)
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          format: "spdx-json"
+          output: "sbom.spdx.json"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
+
+      - name: Sign image with Cosign (Keyless OIDC)
+        run: |
+          cosign sign --yes \
+            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+
+      - name: Attest SBOM with Cosign (Keyless OIDC)
+        run: |
+          cosign attest --yes \
+            --type spdxjson \
+            --predicate sbom.spdx.json \
+            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+
+      - name: Verify image signature and SBOM attestation
+        run: |
+          cosign verify \
+            --certificate-identity-regexp "^https://github\.com/${{ github.repository }}/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          cosign verify-attestation \
+            --type spdxjson \
+            --certificate-identity-regexp "^https://github\.com/${{ github.repository }}/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}" > /dev/null

@@ -10,24 +10,45 @@ on:
 permissions:
   contents: read
   packages: read
+  security-events: write # Required to upload SARIF files to Security tab
+
+env:
+  TRIVY_VERSION: v0.76.2
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+
+      - name: Lint Dockerfile with Hadolint
+        uses: hadolint/hadolint-action@54c9adbab1582c2ef04b2016b760714a4bfde3cf # v3.1.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
+
+      - name: Scan Dockerfile with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "config"
+          scan-ref: "Dockerfile"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          version: ${{ env.TRIVY_VERSION }}
 
       # Set up QEMU for multi-arch builds
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
+        uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
 
       # Set up Docker buildx
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
       - name: Login to GHCR
-        uses: docker/login-action@v4
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -37,7 +58,7 @@ jobs:
       # ref: https://github.com/docker/metadata-action
       - name: Docker metadata
         id: meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
         with:
           images: ghcr.io/${{ github.repository }}
           tags: |
@@ -55,20 +76,58 @@ jobs:
 
       - name: Get current date
         id: date
-        run: |
-          echo "{date}={$(date -Iseconds)}" >> $GITHUB_STATE
+        run: echo "date=$(date -Iseconds)" >> "$GITHUB_OUTPUT"
 
       - name: Build only
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           platforms: linux/amd64,linux/arm64
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           build-args: |
-            LABEL_SOURCE="https://github.com/xenOs76/netdrill"
-            LABEL_CREATED=${{ env.date }}
+            LABEL_SOURCE="https://github.com/${{ github.repository }}"
+            LABEL_CREATED=${{ steps.date.outputs.date }}
             LABEL_REVISION=${{ github.sha }}
           # BuildKit cache
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Export Docker image for Trivy scan
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/${{ runner.arch == 'ARM64' && 'arm64' || 'amd64' }}
+          outputs: type=docker,dest=/tmp/netdrill.tar
+          tags: ${{ steps.meta.outputs.tags }}
+          build-args: |
+            LABEL_SOURCE="https://github.com/${{ github.repository }}"
+            LABEL_CREATED=${{ steps.date.outputs.date }}
+            LABEL_REVISION=${{ github.sha }}
+          cache-from: type=gha
+
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          input: "/tmp/netdrill.tar"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Generate Trivy SARIF report
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          input: "/tmp/netdrill.tar"
+          format: "sarif"
+          output: "trivy-results.sarif"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Upload Trivy scan results to GitHub Security tab
+        if: always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: trivy-results.sarif

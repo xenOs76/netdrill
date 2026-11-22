@@ -1,0 +1,6 @@
+---
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+default: true
+MD024:
+  siblings_only: true # allow repeated headings (e.g. ### Chore, ### Feat) across changelog sections
+
