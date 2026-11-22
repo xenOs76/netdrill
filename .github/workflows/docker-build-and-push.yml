@@ -98,20 +98,48 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Run Trivy vulnerability scanner
+      - name: Resolve platform image digests
+        id: digests
+        run: |
+          REPO="${{ steps.date.outputs.repo }}"
+          INDEX_DIGEST="${{ steps.build-and-push.outputs.digest }}"
+          MANIFEST_JSON=$(docker buildx imagetools inspect "ghcr.io/${REPO}@${INDEX_DIGEST}" --raw)
+          AMD64_DIGEST=$(echo "${MANIFEST_JSON}" | jq -r '.manifests[] | select(.platform.os=="linux" and .platform.architecture=="amd64") | .digest')
+          ARM64_DIGEST=$(echo "${MANIFEST_JSON}" | jq -r '.manifests[] | select(.platform.os=="linux" and .platform.architecture=="arm64") | .digest')
+          if [ -z "${AMD64_DIGEST}" ] || [ -z "${ARM64_DIGEST}" ]; then
+            echo "Failed to resolve amd64/arm64 digests from index ${INDEX_DIGEST}" >&2
+            exit 1
+          fi
+          echo "amd64=${AMD64_DIGEST}" >> "$GITHUB_OUTPUT"
+          echo "arm64=${ARM64_DIGEST}" >> "$GITHUB_OUTPUT"
+
+      - name: Run Trivy vulnerability scanner (linux/amd64)
         env:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: "image"
-          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.amd64 }}"
           format: "table"
           exit-code: "1"
           severity: "HIGH,CRITICAL"
           version: ${{ env.TRIVY_VERSION }}
 
-      - name: Generate Trivy SARIF report
+      - name: Run Trivy vulnerability scanner (linux/arm64)
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.arm64 }}"
+          format: "table"
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Generate Trivy SARIF report (linux/amd64)
         if: always()
         env:
           TRIVY_USERNAME: ${{ github.actor }}
@@ -119,52 +147,100 @@ jobs:
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: "image"
-          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.amd64 }}"
           format: "sarif"
-          output: "trivy-results.sarif"
+          output: "trivy-results-amd64.sarif"
           version: ${{ env.TRIVY_VERSION }}
 
-      - name: Upload Trivy scan results to GitHub Security tab
+      - name: Generate Trivy SARIF report (linux/arm64)
+        if: always()
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.arm64 }}"
+          format: "sarif"
+          output: "trivy-results-arm64.sarif"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Upload Trivy SARIF (linux/amd64) to GitHub Security tab
         uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
         if: always()
         with:
-          sarif_file: trivy-results.sarif
+          sarif_file: trivy-results-amd64.sarif
+          category: trivy-amd64
 
-      - name: Generate SBOM (SPDX JSON)
+      - name: Upload Trivy SARIF (linux/arm64) to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        if: always()
+        with:
+          sarif_file: trivy-results-arm64.sarif
+          category: trivy-arm64
+
+      - name: Generate SBOM (linux/amd64, SPDX JSON)
         env:
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: "image"
-          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.amd64 }}"
           format: "spdx-json"
-          output: "sbom.spdx.json"
+          output: "sbom-amd64.spdx.json"
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Generate SBOM (linux/arm64, SPDX JSON)
+        env:
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: "image"
+          image-ref: "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.digests.outputs.arm64 }}"
+          format: "spdx-json"
+          output: "sbom-arm64.spdx.json"
           version: ${{ env.TRIVY_VERSION }}
 
       - name: Install Cosign
         uses: sigstore/cosign-installer@398d4b0eeef1380460a10c8013a76f728fb906ac # v3.9.1
 
-      - name: Sign image with Cosign (Keyless OIDC)
+      - name: Sign image index and platform manifests with Cosign (Keyless OIDC)
         run: |
+          REPO="${{ steps.date.outputs.repo }}"
           cosign sign --yes \
-            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
+            "ghcr.io/${REPO}@${{ steps.build-and-push.outputs.digest }}" \
+            "ghcr.io/${REPO}@${{ steps.digests.outputs.amd64 }}" \
+            "ghcr.io/${REPO}@${{ steps.digests.outputs.arm64 }}"
 
-      - name: Attest SBOM with Cosign (Keyless OIDC)
+      - name: Attest per-platform SBOMs with Cosign (Keyless OIDC)
         run: |
+          REPO="${{ steps.date.outputs.repo }}"
           cosign attest --yes \
             --type spdxjson \
-            --predicate sbom.spdx.json \
-            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
-
-      - name: Verify image signature and SBOM attestation
-        run: |
-          cosign verify \
-            --certificate-identity-regexp "^https://github\.com/${{ github.repository }}/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
-            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}"
-          cosign verify-attestation \
+            --predicate sbom-amd64.spdx.json \
+            "ghcr.io/${REPO}@${{ steps.digests.outputs.amd64 }}"
+          cosign attest --yes \
             --type spdxjson \
-            --certificate-identity-regexp "^https://github\.com/${{ github.repository }}/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$" \
-            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
-            "ghcr.io/${{ steps.date.outputs.repo }}@${{ steps.build-and-push.outputs.digest }}" > /dev/null
+            --predicate sbom-arm64.spdx.json \
+            "ghcr.io/${REPO}@${{ steps.digests.outputs.arm64 }}"
+
+      - name: Verify image signatures and SBOM attestations
+        run: |
+          REPO="${{ steps.date.outputs.repo }}"
+          OIDC_IDENTITY_RE="^https://github\.com/${{ github.repository }}/\.github/workflows/docker-build-and-push\.yml@refs/tags/.*$"
+          OIDC_ISSUER="https://token.actions.githubusercontent.com"
+          for DIGEST in "${{ steps.build-and-push.outputs.digest }}" "${{ steps.digests.outputs.amd64 }}" "${{ steps.digests.outputs.arm64 }}"; do
+            cosign verify \
+              --certificate-identity-regexp "${OIDC_IDENTITY_RE}" \
+              --certificate-oidc-issuer "${OIDC_ISSUER}" \
+              "ghcr.io/${REPO}@${DIGEST}"
+          done
+          for DIGEST in "${{ steps.digests.outputs.amd64 }}" "${{ steps.digests.outputs.arm64 }}"; do
+            cosign verify-attestation \
+              --type spdxjson \
+              --certificate-identity-regexp "${OIDC_IDENTITY_RE}" \
+              --certificate-oidc-issuer "${OIDC_ISSUER}" \
+              "ghcr.io/${REPO}@${DIGEST}" > /dev/null
+          done
