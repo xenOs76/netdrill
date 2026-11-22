@@ -1,16 +1,3 @@
 # NetDrill is a Kubernetes network troubleshooting container that requires root
 # for raw-socket tools (tcpdump, nmap) and on-demand apk add aliases.
 DS-0002
-
-# Temporary override until upstream Go binaries are rebuilt with Go >= 1.27.3,
-# github.com/klauspost/compress >= v1.18.7, and golang.org/x/net >= v0.62.0.
-#
-# aws-probe 0.3.1 (go1.26.7, klauspost/compress v1.18.6)
-# https-wrench 0.17.0 (go1.27.1, golang.org/x/net v0.58.0)
-CVE-2026-63209
-CVE-2026-78661
-CVE-2026-78667
-CVE-2026-78669
-CVE-2026-97031
-CVE-2026-111943
-
