@@ -15,8 +15,9 @@ Resolve the tag to an immutable platform digest first, then verify and pull that
 exact digest:
 
 ```bash
+TAG="${TAG:-latest}"
 ARCH=$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
-DIGEST=$(docker buildx imagetools inspect "ghcr.io/xenos76/netdrill:<tag>" --raw \
+DIGEST=$(docker buildx imagetools inspect "ghcr.io/xenos76/netdrill:${TAG}" --raw \
   | jq -r --arg arch "$ARCH" '.manifests[] | select(.platform.os=="linux" and .platform.architecture==$arch) | .digest')
 IMAGE_REF="ghcr.io/xenos76/netdrill@${DIGEST}"
 

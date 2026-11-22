@@ -64,8 +64,6 @@ jobs:
             # Branch name
             # type=ref,event=branch
             #
-            # Git short SHA
-            type=sha,prefix=
             # full length sha
             type=sha,format=long
             #
@@ -244,3 +242,12 @@ jobs:
               --certificate-oidc-issuer "${OIDC_ISSUER}" \
               "ghcr.io/${REPO}@${DIGEST}" > /dev/null
           done
+
+      - name: Re-tag latest after Cosign push
+        if: contains(steps.meta.outputs.tags, ':latest')
+        run: |
+          REPO="${{ steps.date.outputs.repo }}"
+          docker buildx imagetools create \
+            --prefer-index=false \
+            --tag "ghcr.io/${REPO}:latest" \
+            "ghcr.io/${REPO}@${{ steps.build-and-push.outputs.digest }}"
