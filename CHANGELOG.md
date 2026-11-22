@@ -1,5 +1,24 @@
 # Netdrill
 
+## v0.2.0 (2026-11-22)
+
+### Ci
+
+- Pin all GitHub Actions by commit SHA
+- Add Hadolint linting and Trivy config/image scanning (`HIGH,CRITICAL`) with
+  GitHub Security tab SARIF upload
+- Scan `linux/amd64` and `linux/arm64` image digests independently and generate
+  per-platform SPDX JSON SBOMs
+- Sign multi-platform index and platform manifests and attest per-platform SBOMs
+  with keyless Cosign (OIDC)
+
+### Chore
+
+- Pin Alpine base image to `3.24.4` digest and add `HEALTHCHECK` in `Dockerfile`
+- Add `.markdownlint.yaml` configuration
+- Document immutable-digest Cosign verification and pull workflow in `README.md`
+- Trigger rebuild to add https-wrench 0.17.1 and aws-probe 0.3.2
+
 ## v0.1.8 (2026-10-24)
 
 ### Chore
