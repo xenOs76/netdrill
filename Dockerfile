@@ -1,4 +1,4 @@
-ARG ALPINE_VERSION=3.24.3
+ARG ALPINE_VERSION=3.24.4@sha256:f59abe656b692d901e184be3445e084786602108599d2a51d229c0f5a48c71bf
 
 # Fetcher stage
 FROM alpine:${ALPINE_VERSION} AS fetcher
@@ -105,5 +105,7 @@ ENV ZELLIJ_CONFIG_DIR=/etc/zellij
 
 COPY ./config/bashrc_local /etc/bashrc_local
 RUN echo 'source /etc/bashrc_local' >> /root/.bashrc
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD exit 0
 
 CMD ["/bin/bash"]
