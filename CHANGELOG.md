@@ -1,5 +1,14 @@
 # Netdrill
 
+## v0.2.1 (2026-11-23)
+
+### Ci
+
+- Re-tag `latest` after Cosign signing and attestation in
+  `docker-build-and-push.yml`
+- Drop short git SHA tag and keep only the long SHA tag (`sha-<40-char>`)
+- Default `TAG` to `latest` in `README.md` Cosign verification snippet
+
 ## v0.2.0 (2026-11-22)
 
 ### Ci
