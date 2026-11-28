@@ -9,6 +9,15 @@ A Docker container for Kubernetes network troubleshooting.\
 Better deployed with
 [kubectl-netdrill](https://github.com/xenOs76/kubectl-netdrill).
 
+## On-Demand Tools
+
+To keep the base image small, heavier or privileged tools (`tcpdump`,
+`tcptraceroute`, `nmap`, `nvim`, `file`, `git`, `go`, `htop`, `nix`, `python`,
+`zellij`) are aliased in `/etc/bashrc_local` to install on first use via
+`apk add`. Running them (including packet capture with `tcpdump`) requires
+outbound access to Alpine package repositories and a writable container
+filesystem.
+
 ## Verify Image Signature & SBOM
 
 Resolve the tag to an immutable platform digest first, then verify and pull that
