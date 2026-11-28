@@ -32,7 +32,6 @@ alias get-direnv-config-template='cat /etc/dotDirenvTemplate'
 alias jwtinfo-eks-token="https-wrench jwtinfo --token-file /var/run/secrets/eks.amazonaws.com/serviceaccount/token"
 alias jwtinfo-kubernetes-token="https-wrench jwtinfo --token-file /var/run/secrets/kubernetes.io/serviceaccount/token"
 alias nvim-os76="nix run github:xenos76/os76-nvf"
-alias vi="nvim"
 
 #
 # Aliases for packages to install on demand
@@ -42,5 +41,9 @@ alias git="apk add -q git && /usr/bin/git"
 alias go="apk add -q go && /usr/bin/go"
 alias htop="apk add -q htop && /usr/bin/htop"
 alias nix="apk add -q nix && /usr/bin/nix --extra-experimental-features nix-command --extra-experimental-features flakes"
+alias nmap="apk add -q nmap nmap-scripts && /usr/bin/nmap"
+alias nvim="apk add -q neovim && /usr/bin/nvim"
 alias python="apk add -q python3 && /usr/bin/python"
+alias tcpdump="apk add -q tcpdump && /usr/bin/tcpdump"
+alias tcptraceroute="apk add -q tcptraceroute && /usr/bin/tcptraceroute"
 alias zellij="apk add -q zellij && /usr/bin/zellij"
