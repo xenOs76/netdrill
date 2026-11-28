@@ -1,5 +1,18 @@
 # Netdrill
 
+## Unreleased
+
+### Feat
+
+- Source `/etc/bashrc_local` via `/etc/bash/bashrc-local.sh` instead of
+  `/root/.bashrc` so Starship, completions, and aliases load when `/root` is
+  shadowed by an `emptyDir` mount
+- Move `direnv-templates` from `/root/direnv-templates` to
+  `/sample-configs/direnv-templates` for read-only container compatibility
+- Add secure-mode MOTD in `config/bashrc_local` when `SECURE="true"`
+- Display `nf-md-shield_check` glyph after hostname in `config/starship.toml`
+  when `SECURE="true"`
+
 ## v0.2.2 (2026-11-28)
 
 ### Refactor
