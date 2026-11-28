@@ -11,12 +11,20 @@ Better deployed with
 
 ## On-Demand Tools
 
-To keep the base image small, heavier or privileged tools (`tcpdump`,
-`tcptraceroute`, `nmap`, `nvim`, `file`, `git`, `go`, `htop`, `nix`, `python`,
-`zellij`) are aliased in `/etc/bashrc_local` to install on first use via
-`apk add`. Running them (including packet capture with `tcpdump`) requires
-outbound access to Alpine package repositories and a writable container
-filesystem.
+`tcpdump`, `tcptraceroute`, `nmap`, `nvim`, `file`, `git`, `go`, `htop`, `nix`,
+`python`, and `zellij` are aliased in `/etc/bashrc_local` to install on first
+use via `apk add` (requires Alpine repo access and a writable filesystem).
+
+## Secure Mode
+
+Built for read-only pods (e.g. `kubectl-netdrill` with `emptyDir` on `/root`
+and `/tmp`):
+
+- Bash loads `/etc/bashrc_local` via `/etc/bash/bashrc-local.sh` (unaffected by
+  a mounted `/root`).
+- `direnv` templates live in `/sample-configs/direnv-templates`.
+- `SECURE="true"` prints a secure-mode MOTD and adds a shield icon
+  (`nf-md-shield_check`) to the Starship prompt.
 
 ## Verify Image Signature & SBOM
 
