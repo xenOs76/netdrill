@@ -37,8 +37,60 @@ RUN set -ex \
   && mv aws-probe /tmp/aws-probe \
   && chmod +x /tmp/aws-probe
 
-# Main stage
-FROM alpine:${ALPINE_VERSION}
+# Builder stage
+FROM alpine:${ALPINE_VERSION} AS builder
+
+RUN set -ex \
+  && apk update \
+  && apk upgrade \
+  && apk add --no-cache \
+  !fzf-bash-plugin \
+  bash \
+  bash-completion \
+  bind-tools \
+  curl \
+  direnv \
+  doggo \
+  eza \
+  fzf \
+  iperf3 \
+  iputils \
+  jq \
+  openssl \
+  starship \
+  wget \
+  zellij-bash-completion \
+  zoxide \
+  zoxide-bash-completion \
+  && rm -rf \
+  /usr/share/doc \
+  /usr/share/man \
+  /usr/share/info \
+  /var/cache/apk/*
+
+# Install https-wrench from fetcher
+COPY --from=fetcher /tmp/https-wrench /usr/local/bin/https-wrench
+RUN /usr/local/bin/https-wrench --version
+
+# Install aws-probe from fetcher
+COPY --from=fetcher /tmp/aws-probe /usr/local/bin/aws-probe
+RUN /usr/local/bin/aws-probe -v
+
+# Customize bash with local settings
+COPY ./config/dotDirenvTemplate /etc/dotDirenvTemplate
+COPY ./config/starship.toml /etc/starship.toml
+
+RUN mkdir /root/direnv-templates
+COPY ./config/direnv-templates /root/direnv-templates
+
+RUN mkdir /etc/zellij
+COPY ./config/zellij/config.kdl /etc/zellij/config.kdl
+
+COPY ./config/bashrc_local /etc/bashrc_local
+RUN echo 'source /etc/bashrc_local' >> /root/.bashrc
+
+# Final squashed stage (eliminates duplicate overwritten files across layers)
+FROM scratch
 
 ARG LABEL_CREATED
 ARG LABEL_DESCRIPTION
@@ -53,58 +105,13 @@ LABEL org.opencontainers.image.revision=$LABEL_REVISION
 LABEL org.opencontainers.image.source=$LABEL_SOURCE
 LABEL org.opencontainers.image.title="NetDrill"
 
-RUN set -ex \
-  && apk update \
-  && apk upgrade \
-  && apk add --no-cache \
-  bash \
-  bash-completion \
-  bind-tools \
-  curl \
-  direnv \
-  doggo \
-  eza \
-  fzf \
-  iperf3 \
-  iputils \
-  jq \
-  neovim \
-  nmap \
-  nmap-scripts \
-  openssl \
-  starship \
-  tcpdump \
-  tcptraceroute \
-  wget \
-  zellij-bash-completion \
-  zoxide \
-  zoxide-bash-completion
-
-# Install https-wrench from fetcher
-COPY --from=fetcher /tmp/https-wrench /usr/local/bin/https-wrench
-RUN /usr/local/bin/https-wrench --version
-
-# Install aws-probe from fetcher
-COPY --from=fetcher /tmp/aws-probe /usr/local/bin/aws-probe
-RUN /usr/local/bin/aws-probe -v
+COPY --from=builder / /
 
 WORKDIR /root
 
-# Customize bash with local settings
-COPY ./config/dotDirenvTemplate /etc/dotDirenvTemplate
-
-COPY ./config/starship.toml /etc/starship.toml
-ENV STARSHIP_CONFIG=/etc/starship.toml 
-
-RUN mkdir /root/direnv-templates
-COPY ./config/direnv-templates /root/direnv-templates
-
-RUN mkdir /etc/zellij
-COPY ./config/zellij/config.kdl /etc/zellij/config.kdl
+ENV PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+ENV STARSHIP_CONFIG=/etc/starship.toml
 ENV ZELLIJ_CONFIG_DIR=/etc/zellij
-
-COPY ./config/bashrc_local /etc/bashrc_local
-RUN echo 'source /etc/bashrc_local' >> /root/.bashrc
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 CMD exit 0
 

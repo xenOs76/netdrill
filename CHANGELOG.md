@@ -1,5 +1,15 @@
 # Netdrill
 
+## v0.2.2 (2026-11-28)
+
+### Refactor
+
+- Defer `nmap`, `nmap-scripts`, `tcpdump`, `tcptraceroute`, and `neovim` to
+  on-demand `apk add` aliases in `config/bashrc_local` and drop `alias vi="nvim"`
+- Block `fzf-bash-plugin` (`!fzf-bash-plugin`) to avoid pulling in `perl`
+- Prune `/usr/share/{doc,man,info}` and `/var/cache/apk/*` in `Dockerfile`
+- Squash the final image via a `FROM scratch` stage in `Dockerfile`
+
 ## v0.2.1 (2026-11-23)
 
 ### Ci
