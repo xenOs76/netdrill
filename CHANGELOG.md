@@ -1,6 +1,6 @@
 # Netdrill
 
-## Unreleased
+## v0.2.2 (2026-11-28)
 
 ### Refactor
 
