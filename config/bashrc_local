@@ -47,3 +47,7 @@ alias python="apk add -q python3 && /usr/bin/python"
 alias tcpdump="apk add -q tcpdump && /usr/bin/tcpdump"
 alias tcptraceroute="apk add -q tcptraceroute && /usr/bin/tcptraceroute"
 alias zellij="apk add -q zellij && /usr/bin/zellij"
+
+if [[ "${SECURE:-}" == "true" ]]; then
+  echo -e "\n### Secure mode ON ###\nRead-only FS except for /root and /tmp\nSample files in /sample-configs"
+fi

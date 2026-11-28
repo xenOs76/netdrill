@@ -80,14 +80,12 @@ RUN /usr/local/bin/aws-probe -v
 COPY ./config/dotDirenvTemplate /etc/dotDirenvTemplate
 COPY ./config/starship.toml /etc/starship.toml
 
-RUN mkdir /root/direnv-templates
-COPY ./config/direnv-templates /root/direnv-templates
-
-RUN mkdir /etc/zellij
+RUN mkdir -p /sample-configs/direnv-templates /etc/zellij
+COPY ./config/direnv-templates /sample-configs/direnv-templates
 COPY ./config/zellij/config.kdl /etc/zellij/config.kdl
 
 COPY ./config/bashrc_local /etc/bashrc_local
-RUN echo 'source /etc/bashrc_local' >> /root/.bashrc
+RUN echo 'source /etc/bashrc_local' >> /etc/bash/bashrc-local.sh
 
 # Final squashed stage (eliminates duplicate overwritten files across layers)
 FROM scratch
